@@ -12,6 +12,9 @@ using System.Net;
 
 namespace SerialToTCPIP.Core
 {
+    /// <summary>
+    /// Simple class to forward data from the serial port to the TCPIP port and visa versa.
+    /// </summary>
     public class Mapper
     {
         TcpListener Port;
@@ -20,12 +23,30 @@ namespace SerialToTCPIP.Core
         SerialPort ComPort = new SerialPort();
         const int MaxBuffer = 8192;
         private DateTime LastDataRx;
+        bool _TCPIPActive;
 
         Thread TCPIPToSerial;
 
+        public delegate void LogEventDelegate(string eventMessage);
+        public event LogEventDelegate TriggerLog;
 
+        public void ClosePort()
+        {
+            ComPort.Close();
+            _TCPIPActive = false;
+            Port.Stop();
+        }
+
+
+        /// <summary>
+        /// Open the serial port / TCPIP port and start listening for connections
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="port"></param>
+        /// <param name="serialPort"></param>
         public void OpenPort(string address,int port, string serialPort )
         {
+            _TCPIPActive = true;
             IPAddress ipAddress = IPAddress.Parse(address);
             Port = new TcpListener (ipAddress,port);
             Port.Start();
@@ -57,32 +78,32 @@ namespace SerialToTCPIP.Core
         {
             byte[] data = new byte[1024];
 
-            Debug.WriteLine("Server is listening on " + Port.LocalEndpoint);
-            while (true)
+            LogEvent("Server is listening on " + Port.LocalEndpoint);
+            while (_TCPIPActive == true)
             {
                 if (Port.Pending())
                 {
                     client = Port.AcceptSocket();
 
-                    Debug.WriteLine("Connection accepted.");
+                    LogEvent("Connection accepted.");
 
                     try
                     {
-                        while (client.Connected)
+                        while (client.Connected && _TCPIPActive == true)
                         {
                             System.Threading.Thread.Sleep(100);
 
                             int size = client.Receive(data);
                             if (size > 0)
                             {
-                                Debug.WriteLine("ip rx:" + BitConverter.ToString(data,0,size) + "(" + size + ")");
+                                LogEvent("ip rx:" + BitConverter.ToString(data,0,size) + "(" + size + ")");
                                 SerialWrite(data, size);
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine(ex.Message);
+                        LogEvent(ex.Message);
                     }
                     client.Close();
                 }
@@ -97,16 +118,16 @@ namespace SerialToTCPIP.Core
             try
             {
                 client.Send(data, sendLen, SocketFlags.None);
-                Debug.WriteLine("ip tx:" + BitConverter.ToString(data, 0, sendLen) + "(" + sendLen + ")");
+                LogEvent("ip tx:" + BitConverter.ToString(data, 0, sendLen) + "(" + sendLen + ")");
             }
             catch (Exception ex)
             { }
         }
 
-        public void SerialWrite(byte[] data, int sendLen)
+        private void SerialWrite(byte[] data, int sendLen)
         {
             this.ComPort.Write(data, 0, sendLen);
-            Debug.WriteLine("s tx:" + BitConverter.ToString(data, 0, sendLen) + "(" + sendLen + ")");
+            LogEvent("s tx:" + BitConverter.ToString(data, 0, sendLen) + "(" + sendLen + ")");
         }
 
         private void ComPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -114,10 +135,15 @@ namespace SerialToTCPIP.Core
             LastDataRx = DateTime.Now;
             byte[] rxBuffer = new byte[MaxBuffer];
             int tmpLen = ComPort.Read(rxBuffer, 0, MaxBuffer);
-            Debug.WriteLine("s rx:" + BitConverter.ToString(rxBuffer, 0, tmpLen) + "(" + tmpLen + ")");
+            LogEvent("s rx:" + BitConverter.ToString(rxBuffer, 0, tmpLen) + "(" + tmpLen + ")");
             TCPIPWrite(rxBuffer, tmpLen);
         }
 
+        private void LogEvent(string eventMessage)
+        {
+            Debug.WriteLine(eventMessage);
+            TriggerLog?.Invoke(eventMessage);
+        }
 
     }
 }

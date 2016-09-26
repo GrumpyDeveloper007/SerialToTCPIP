@@ -5,8 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SerialToTCPIP"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" Loaded="Window_Loaded">
-    <Grid>
-        
+        Title="MainWindow" Height="350" Width="525" Loaded="Window_Loaded"
+        WindowStartupLocation="CenterScreen" Closing="Window_Closing" >
+    <Grid Margin="10,10,2,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="27*"/>
+            <RowDefinition Height="27*"/>
+            <RowDefinition Height="27*"/>
+            <RowDefinition Height="224*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="80"/>
+            <ColumnDefinition Width="296*"/>
+            <ColumnDefinition Width="80"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Margin="21,10,0,0" TextWrapping="Wrap" Text="IP Address" />
+        <TextBox x:Name="txtIPAddress" Grid.Row="0" Grid.Column="1" Margin="2,2,2,2" TextWrapping="Wrap" Text="127.0.0.1"/>
+        <Button x:Name="butStart" Content="Start" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" Click="butStart_Click" />
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="21,10,0,0" TextWrapping="Wrap" Text="Port" />
+        <TextBox x:Name="txtTCPIPPort" Grid.Row="1" Grid.Column="1" Margin="2,2,2,2" TextWrapping="Wrap" Text="8000"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="21,10,0,0" TextWrapping="Wrap" Text="Serial Port" />
+        <TextBox x:Name="txtSerialPort" Grid.Row="2" Grid.Column="1" Margin="2,2,2,2" TextWrapping="Wrap" Text="COM8"/>
+        <TextBox Name="txtLog" Grid.Column="1" Margin="2,2,2,2" Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  TextWrapping="Wrap" Text="" ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Visible" />
     </Grid>
 </Window>
