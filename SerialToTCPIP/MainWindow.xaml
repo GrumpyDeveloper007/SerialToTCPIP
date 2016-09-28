@@ -20,7 +20,7 @@
             <ColumnDefinition Width="80"/>
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Column="0" Margin="21,10,0,0" TextWrapping="Wrap" Text="IP Address" />
-        <TextBox x:Name="txtIPAddress" Grid.Row="0" Grid.Column="1" Margin="2,2,2,2" TextWrapping="Wrap" Text="127.0.0.1"/>
+        <TextBox x:Name="txtIPAddress" Grid.Row="0" Grid.Column="1" Margin="2,2,2,2" TextWrapping="Wrap" Text="Any"/>
         <Button x:Name="butStart" Content="Start" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" Click="butStart_Click" />
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="21,10,0,0" TextWrapping="Wrap" Text="Port" />

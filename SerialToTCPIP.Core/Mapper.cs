@@ -30,11 +30,15 @@ namespace SerialToTCPIP.Core
         public delegate void LogEventDelegate(string eventMessage);
         public event LogEventDelegate TriggerLog;
 
+        /// <summary>
+        /// Close down the ports and kill the worker thread
+        /// </summary>
         public void ClosePort()
         {
             ComPort.Close();
             _TCPIPActive = false;
             Port.Stop();
+            TCPIPToSerial.Abort();
         }
 
 
@@ -47,8 +51,17 @@ namespace SerialToTCPIP.Core
         public void OpenPort(string address,int port, string serialPort )
         {
             _TCPIPActive = true;
-            IPAddress ipAddress = IPAddress.Parse(address);
-            Port = new TcpListener (ipAddress,port);
+            IPAddress ipAddress;
+            if (address.ToUpper() =="ANY")
+            {
+                ipAddress = IPAddress.Any;
+            }
+            else
+            {
+                ipAddress = IPAddress.Parse(address);
+            }
+            
+            Port = new TcpListener (ipAddress, port);
             Port.Start();
 
             TCPIPToSerial = new Thread(TCPIPReveiceHandler);
@@ -99,6 +112,10 @@ namespace SerialToTCPIP.Core
                                 LogEvent("ip rx:" + BitConverter.ToString(data,0,size) + "(" + size + ")");
                                 SerialWrite(data, size);
                             }
+                            else
+                            {
+                                break;
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -106,6 +123,7 @@ namespace SerialToTCPIP.Core
                         LogEvent(ex.Message);
                     }
                     client.Close();
+                    LogEvent("Connection closed.");
                 }
 
                 System.Threading.Thread.Sleep(100);

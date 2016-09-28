@@ -60,6 +60,7 @@ namespace SerialToTCPIP
                 if (_logLines>1000)
                 {
                     txtLog.Text = "";
+                    _logLines = 0;
                 }
                 txtLog.AppendText(eventMessage + "\r\n");
                 _logLines++;
